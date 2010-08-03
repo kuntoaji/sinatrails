@@ -1,0 +1,27 @@
+%table
+  %thead
+    %tr
+      %th
+        Name
+      %th
+        Email
+      %th
+        Role
+      %th
+        Actions
+  %tbody
+    - @users.each do |user|
+      %tr
+        %td
+          %a{:href => "/users/#{user.id}"}
+            = user.name
+        %td
+          = user.email
+        %td
+          = user.role
+        %td
+          %form{:action => "/users/#{user.id}", :method => "post"}
+            %input{:type => "hidden", :name => "_method", :value => "delete"}
+            %input{:type => "hidden", :name => "id", :value => user.id}
+            %button{:type => "submit"}
+              Delete

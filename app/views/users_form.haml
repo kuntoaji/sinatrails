@@ -1,0 +1,29 @@
+%form{:action => "/users#{'/' + @user.id.to_s if @user}", :method => "post"}
+  - if @user.id
+    %input{:type => "hidden", :name => "_method", :value => "put"}
+  %label{:for => "user_email"}
+    Email
+  %input{:type => "email", :value => "#{@user.email}", :name => "user[email]"}
+  %br
+  %label{:for => "user_password"}
+    Password    
+  %input{:type => "password", :name => "user[password]"}
+  %br
+  %label{:for => "user_password_confirmation"}
+    Password Confirmation
+  %input{:type => "password", :name => "user[password_confirmation]"}
+  %br
+  %label{:for => "user_name"}
+    Name
+  %input{:type => "text", :value => "#{@user.name}", :name => "user[name]"}
+  %br
+  %label{:for => "user_role"}
+    Role
+  %select{:name => "user[role]"}
+    %option{:value => "admin", :selected => (true if @user.role == "admin")}
+      Admin
+    %option{:value => "client", :selected => (true if @user.role == "client")}
+      Client
+  %br
+  %button{:type => "submit"}
+    Save

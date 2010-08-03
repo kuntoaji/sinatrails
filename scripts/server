@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+arguments = ARGV.join(" ")
+
+system("ruby #{File.join(File.expand_path('../../', __FILE__), 'application.rb') + " " + arguments}")
