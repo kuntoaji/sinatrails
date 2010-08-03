@@ -6,4 +6,5 @@ To use this project:
 3. gem install activerecord
 4. git clone git://github.com/kuntoaji/sinatrails.git
 5. run rake db:migrate to create user. Note: Currently only support db:migrate for migration.
-6. ./scripts/server to run the server or ./scripts/console to the console.
+6. run rake test to run ./test/application_test.rb
+7. ./scripts/server to run the server or ./scripts/console to the console.

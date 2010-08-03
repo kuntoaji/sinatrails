@@ -12,5 +12,6 @@ require 'yaml'
   Dir[File.join(dir, "*.rb")].each {|file| require File.basename(file) }
 end
 
+include Sinatrails::Authorization
 enable :sessions
 set :views, File.dirname(__FILE__) + '/app/views'

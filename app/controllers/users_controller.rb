@@ -34,7 +34,6 @@ end
 
 post '/users' do
   authorize_admin
-  parse_nested_params
   @user = User.new(params[:user])
 
   if @user.save
@@ -52,7 +51,6 @@ end
 
 put '/users/:id' do
   authorize_admin
-  parse_nested_params
   @user = User.find params[:id]
 
   if @user.update_attributes(params[:user])
