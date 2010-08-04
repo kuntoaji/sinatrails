@@ -1,25 +1,3 @@
-get '/users/login' do
-  redirect "/" if current_user
-  haml :users_login
-end
-
-post '/users/session' do
-  @user = User.authenticate(params[:email], params[:password])
-
-  if @user
-    session["user"] = @user.id
-    redirect "/mentions"
-  else
-    redirect "/"
-  end
-end
-
-get '/users/logout' do
-  authorize_user or authorize_admin
-  session["user"] = nil
-  haml :users_login
-end
-
 get '/users' do
   authorize_admin
   @users = User.order("created_at desc")

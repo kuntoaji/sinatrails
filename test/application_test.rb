@@ -15,24 +15,24 @@ class ApplicationTest < Test::Unit::TestCase
   end
 
   def test_users_session
-    post "/users/session", :email => "dummy@railsmine.net", :password => "secret"
+    post "/sessions", :email => "dummy@railsmine.net", :password => "secret"
     follow_redirect!
-    assert_equal "http://#{Rack::Test::DEFAULT_HOST}/mentions", last_request.url
+    assert_equal "http://localhost/users", last_request.url
     assert true, last_response.ok?
   end
 
   def test_users_logout
     test_users_session
-    get "/users/logout"
+    get "/logout"
     follow_redirect!
-    assert_equal "http://#{Rack::Test::DEFAULT_HOST}/users/login", last_request.url
+    assert_equal "http://localhost/login", last_request.url
     assert true, last_response.ok?
   end
 
   def test_admin_authorization
     get "/users"
     follow_redirect!
-    assert_equal "http://#{Rack::Test::DEFAULT_HOST}/", last_request.url
+    assert_equal "http://localhost/", last_request.url
     assert true, last_response.ok?
   end
 
