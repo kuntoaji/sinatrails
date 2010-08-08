@@ -1,11 +1,16 @@
-%p
-  Email:
-  = @user.email
-%p
-  Name:
-  = @user.name
-%p
-  Role:
-  = @user.role
-%a{:href => "/users/#{@user.id}/edit"}
-  Edit
+#body
+  %header
+    %h2
+      User profile
+  .content.grid_16
+    %p
+      Email:
+      = @user.email
+    %p
+      Name:
+      = @user.name
+    %p
+      Role:
+      = @user.role
+    %a{:href => "/users/#{@user.id}/edit"}
+      Edit

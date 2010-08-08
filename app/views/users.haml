@@ -1,27 +1,35 @@
-%table
-  %thead
-    %tr
-      %th
-        Name
-      %th
-        Email
-      %th
-        Role
-      %th
-        Actions
-  %tbody
-    - @users.each do |user|
-      %tr
-        %td
-          %a{:href => "/users/#{user.id}"}
-            = user.name
-        %td
-          = user.email
-        %td
-          = user.role
-        %td
-          %form{:action => "/users/#{user.id}", :method => "post"}
-            %input{:type => "hidden", :name => "_method", :value => "delete"}
-            %input{:type => "hidden", :name => "id", :value => user.id}
-            %button{:type => "submit"}
-              Delete
+%div
+  %header
+    %h2
+      Users
+    = partial :menu
+  .content.grid_16
+    %h3
+      Users list
+    %table.fixed
+      %thead
+        %tr
+          %th.name
+            Name
+          %th.email
+            Email
+          %th.role
+            Role
+          %th.action
+            Actions
+      %tbody
+        - @users.each do |user|
+          %tr
+            %td
+              %a{:href => "/users/#{user.id}"}
+                = user.name
+            %td
+              = user.email
+            %td
+              = user.role
+            %td.button
+              %form{:action => "/users/#{user.id}", :method => "post"}
+                %input{:type => "hidden", :name => "_method", :value => "delete"}
+                %input{:type => "hidden", :name => "id", :value => user.id}
+                %button{:type => "submit"}
+                  Delete

@@ -1,8 +1,8 @@
 module Sinatrails
   module Test
-    def destroy_all_users
-      users = User.all
-      users.each{|u| u.destroy}
+    def clean_db
+      DatabaseCleaner.clean
     end
   end
 end
+

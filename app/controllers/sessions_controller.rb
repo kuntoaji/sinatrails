@@ -19,3 +19,4 @@ get '/logout' do
   session["user"] = nil
   redirect "/login"
 end
+

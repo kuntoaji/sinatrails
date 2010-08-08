@@ -1,5 +1,16 @@
-%form{:method => "post", :action => "/users/session"}
-  %input{:type => "email", :name => "email"}
-  %input{:type => "password", :name => "password"}
-  %button{:type => "submit"}
-    Login
+%div
+  %h2
+    Sign in
+  %form{:method => "post", :action => "/sessions", :class => "user"}
+    %ol
+      %li
+        %label{:for => "email"}
+          Email
+        %input{:type => "email", :name => "email"}
+      %li
+        %label{:for => "password"}
+          Password
+        %input{:type => "password", :name => "password"}
+      %li.button
+        %button{:type => "submit"}
+          Login

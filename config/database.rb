@@ -1,3 +1,10 @@
-ActiveRecord::Base.establish_connection(YAML::load(File.open('config/database.yml'))['development']) if development?
-ActiveRecord::Base.establish_connection(YAML::load(File.open('config/database.yml'))['test']) if test?
-ActiveRecord::Base.establish_connection(YAML::load(File.open('config/database.yml'))['production']) if production?
+ActiveRecord::Base.configurations = YAML::load(File.open('config/database.yml'))
+
+if production?
+  ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['production'])
+elsif development?
+  ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['development'])
+elsif test?
+  ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['test'])
+end
+

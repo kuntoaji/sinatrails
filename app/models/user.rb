@@ -1,6 +1,7 @@
 class User < ActiveRecord::Base
   attr_accessor :password, :password_confirmation
   validates :email, :name, :role, :presence => true
+  validates_uniqueness_of :email
   validates_confirmation_of :password_confirmation, :if => :password_is_not_blank?
   before_save :hash_password, :if => :password_is_not_blank?
 

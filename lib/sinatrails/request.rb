@@ -1,5 +1,19 @@
+not_found do
+  log = File.new("log/#{ENV['RACK_ENV']}.log", 'a+')
+  $stderr.reopen log
+  log.close
+  haml :not_found
+end
+
+error do
+  log = File.new("log/#{ENV['RACK_ENV']}.log", 'a+')
+  $stderr.reopen log
+  log.close
+  haml :error
+end
+
 before do
-  # http://sinatra-book.gittr.com/#handling_of_rails_like_nested_params
+  # source: http://sinatra-book.gittr.com/#handling_of_rails_like_nested_params
   if request.post? or request.put?
     new_params = {}
     params.each_pair do |full_key, value|
@@ -14,8 +28,4 @@ before do
     end
     request.params.replace new_params
   end
-end
-
-get '/' do
-  haml :index
 end

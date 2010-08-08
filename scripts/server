@@ -2,4 +2,5 @@
 
 arguments = ARGV.join(" ")
 
-system("ruby #{File.join(File.expand_path('../../', __FILE__), 'application.rb') + " " + arguments}")
+system("bundle exec rackup #{arguments}")
+
