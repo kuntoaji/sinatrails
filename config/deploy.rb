@@ -1,4 +1,4 @@
-set :application, "monitor"
-set :repository, "/home/suitmedia/monitor.git"
-set :domain, "suitmedia@oncomers.com"
-set :deploy_to, "/home/suitmedia/#{application}"
+set :application, "sinatrails"
+set :repository, "/home/exampleuser/sinatrails.git"
+set :domain, "git@example.com"
+set :deploy_to, "/home/exampleuser/#{application}"
