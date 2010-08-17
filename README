@@ -1,8 +1,9 @@
-Sinatrails is sinatra bootstrap project that suit to my needs to create web application with Rails-like directory structure and Active Record as ORM.
+Sinatrails is sinatra bootstrap project that suit to my needs to create web application with Rails-like directory structure, Active Record as ORM, and jQuery.
 
 To use this project:
 1. git clone git://github.com/kuntoaji/sinatrails.git
 2. bundle install
-3. run rake db:migrate to create user. Note: Currently only support db:migrate for migration, so create your database first if you use mysql.
-4. run ./scripts/test to run test units.
-5. ./scripts/server -s thin to execute the thin server or ./scripts/console to the console.
+3. run rake db:migrate to create user. Note: Currently only support db:migrate task, so create your database first if you use mysql.
+4. run rake populate_dummy to create dummy users.
+5. run ./scripts/test to run test units.
+6. ./scripts/server -s thin to execute the thin server or ./scripts/console to the console.

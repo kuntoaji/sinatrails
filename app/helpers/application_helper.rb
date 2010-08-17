@@ -12,5 +12,27 @@ class Application
         erb page, options.merge!(:layout => false)
       end
     end
+
+    def paginate(resources)
+      html = String.new
+
+      if !resources.next_page.nil? and !resources.previous_page.nil?
+        html = "<p>"
+        html += "<a href='#{request.path_info}?page=#{resources.previous_page}'>Prev</a> "
+        html += "#{params[:page]} of #{resources.total_pages} "
+        html += "<a href='#{request.path_info}?page=#{resources.next_page}'>Next</a>"
+        html += "</p>"
+      elsif !resources.next_page.nil? and resources.previous_page.nil?
+        html = "<p>"
+        html += "<a href='#{request.path_info}?page=#{resources.next_page}'>Next</a>"
+        html += "</p>"
+      elsif resources.next_page.nil? and !resources.previous_page.nil?
+        html = "<p>"
+        html += "<a href='#{request.path_info}?page=#{resources.previous_page}'>Prev</a> "
+        html += "#{params[:page]} of #{resources.total_pages}"
+        html += "</p>"
+      end
+      return html
+    end
   end
 end

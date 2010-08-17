@@ -1,42 +1,37 @@
 #body
   %header
     %h2
-      Page
-    = partial :menu
-  .content.grid_16
-    .leftCol.grid_10.alpha
-      %h3
-        Edit
-      .formWrapper
-        %form{:action => "/users#{'/' + @user.id.to_s if @user}", :method => "post", :class => "globalForm"}
-          .inputs
-            %ul
-              - if @user.id
-                %input{:type => "hidden", :name => "_method", :value => "put"}
-              %li
-                %label{:for => "user_email"}
-                  Email
-                %input{:type => "email", :value => "#{@user.email}", :name => "user[email]"}
-              %li
-                %label{:for => "user_password"}
-                  Password    
-                %input{:type => "password", :name => "user[password]"}
-              %li
-                %label{:for => "user_password_confirmation"}
-                  Password Confirmation
-                %input{:type => "password", :name => "user[password_confirmation]"}
-              %li
-                %label{:for => "user_name"}
-                  Name
-                %input{:type => "text", :value => "#{@user.name}", :name => "user[name]"}
-              %li
-                %label{:for => "user_role"}
-                  Role
-                %select{:name => "user[role]"}
-                  %option{:value => "admin", :selected => (true if @user.role == "admin")}
-                    Admin
-                  %option{:value => "client", :selected => (true if @user.role == "client")}
-                    Client
-          .buttons
-            %button{:type => "submit"}
-              Save
+      Edit
+  .content
+    %form{:action => "/users#{'/' + @user.id.to_s if @user}", :method => "post", :class => "globalForm"}
+      .inputs
+        %ul
+          - if @user.id
+            %input{:type => "hidden", :name => "_method", :value => "put"}
+          %li
+            %label{:for => "user_email"}
+              Email
+            %input{:type => "email", :value => "#{@user.email}", :name => "user[email]"}
+          %li
+            %label{:for => "user_password"}
+              Password    
+            %input{:type => "password", :name => "user[password]"}
+          %li
+            %label{:for => "user_password_confirmation"}
+              Password Confirmation
+            %input{:type => "password", :name => "user[password_confirmation]"}
+          %li
+            %label{:for => "user_name"}
+              Name
+            %input{:type => "text", :value => "#{@user.name}", :name => "user[name]"}
+          %li
+            %label{:for => "user_role"}
+              Role
+            %select{:name => "user[role]"}
+              %option{:value => "admin", :selected => (true if @user.role == "admin")}
+                Admin
+              %option{:value => "client", :selected => (true if @user.role == "client")}
+                Client
+      .buttons
+        %button{:type => "submit"}
+          Save

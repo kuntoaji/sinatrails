@@ -1,10 +1,8 @@
 %div
   %header
     %h2
-      Users
-  .content
-    %h3
       Users list
+  .content
     %table
       %thead
         %tr
@@ -29,17 +27,4 @@
             %td
               %a{:rel => "nofollow", :"data-method" => "delete", :"data-confirm" => "Are you sure?", :href => "/users/#{user.id}"}
                 Delete
-
-              %form{:action => "/users/#{user.id}", :method => "post"}
-                %input{:type => "hidden", :name => "_method", :value => "delete"}
-                %input{:type => "hidden", :name => "id", :value => user.id}
-                %button{:type => "submit"}
-                  Delete
-    - if params[:page].to_i > 1
-      %a{:href => "users?page=#{params[:page].to_i - 1}"}
-        Prev
-      %a{:href => "users?page=#{params[:page].to_i + 1}"}
-        Next
-    - elsif params[:page] == 1 or params[:page].blank?
-      %a{:href => "users?page=2"}
-        Next
+        = paginate @users

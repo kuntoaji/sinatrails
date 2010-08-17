@@ -4,7 +4,7 @@ namespace :db do
     require 'sinatra'
     require 'active_record'
     require 'logger'
-    load 'config/environment.rb'
+    require File.join(File.expand_path('../../../', __FILE__), 'config', 'environment.rb')
   end
 
   desc "Migrate the database"

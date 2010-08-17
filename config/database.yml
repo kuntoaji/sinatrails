@@ -8,7 +8,7 @@ development:
   password:
   socket: /var/run/mysqld/mysqld.sock
 
-test: &test
+test:
   adapter: mysql
   encoding: utf8
   reconnect: false
