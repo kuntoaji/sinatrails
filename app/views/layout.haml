@@ -1,2 +1,31 @@
-%h2 layout
-= yield
+!!! 5
+%html
+  %head
+    %title= "Change Me"
+    %link{:rel=>"stylesheet", :href=>"/stylesheets/screen.css"}
+    /[if lt IE 9]
+      %script{:src=>"http://html5shiv.googlecode.com/svn/trunk/html5.js"}
+  %body
+    %header#top
+      .container
+        #logo
+          %h1
+            %a{:href => "/"}
+        #navigation
+          %nav
+            %ul
+              - if current_user
+                %li
+                  %a{:href=>"/users/#{current_user.id}"}
+                    Profile
+                %li
+                  %a{:href=>"/logout"}
+                    Logout              
+              - else
+                %li
+                  %a{:href=>"/login"}
+                    Login              
+    #wrapper
+      = yield
+  %script{:src => "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"}
+  %script{:src => "/javascripts/application.js"}

@@ -1,7 +1,10 @@
 namespace :db do
   # http://github.com/rails/rails/raw/master/activerecord/lib/active_record/railties/databases.rake 
   task :load do
-    load 'config/database.rb'
+    require 'sinatra'
+    require 'active_record'
+    require 'logger'
+    load 'config/environment.rb'
   end
 
   desc "Migrate the database"
@@ -11,4 +14,3 @@ namespace :db do
     ActiveRecord::Migrator.migrate("db/migrate")
   end
 end
-

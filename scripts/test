@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+ENV["RACK_ENV"] = "test"
+
+require 'test/unit'
+require 'rubygems'
+require 'rack/test'
+require 'bundler/setup'
+require File.join(File.expand_path('../../', __FILE__), 'dependencies.rb')
+require File.join(File.expand_path('../../', __FILE__), 'application.rb')
+
+DatabaseCleaner.strategy = :truncation
+
+require File.join(File.expand_path('../../', __FILE__), 'test', 'application_test.rb')
+
+if ARGV.empty?
+  Dir[File.join(File.expand_path('../../', __FILE__), 'test', '*.rb')].each do |file|
+    load file
+  end
+else
+  ARGV.each do |file|
+    load File.join(File.expand_path('../../', __FILE__), 'test', "#{file}_test.rb")
+  end
+end

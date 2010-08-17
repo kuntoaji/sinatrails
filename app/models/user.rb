@@ -1,4 +1,6 @@
 class User < ActiveRecord::Base
+  extend WillPaginate::Finders::Base
+
   attr_accessor :password, :password_confirmation
   validates :email, :name, :role, :presence => true
   validates_uniqueness_of :email

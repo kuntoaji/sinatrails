@@ -1,7 +1,11 @@
 #!/usr/bin/env ruby
 
+require 'rubygems'
+require 'bundler/setup'
+require File.join(File.expand_path('../../', __FILE__), 'dependencies.rb')
 require File.join(File.expand_path('../../', __FILE__), 'application.rb')
 
+# NOTE: Taken from irb script
 #   irb.rb - intaractive ruby
 #   	$Release Version: 0.9.5 $
 #   	$Revision: 11708 $
@@ -21,7 +25,7 @@ else
   end
 end
 
-# source: http://jameskilton.com/2009/04/02/embedding-irb-into-your-ruby-application/
+# NOTE: taken from http://jameskilton.com/2009/04/02/embedding-irb-into-your-ruby-application/
 #require 'irb'
  
 #module IRB # :nodoc:
