@@ -7,3 +7,6 @@ To use this project:
 4. run rake populate_dummy to create dummy users.
 5. run ./scripts/test to run test units.
 6. ./scripts/server -s thin to execute the thin server or ./scripts/console to the console.
+
+License
+Sinatrails is released under MIT license.
