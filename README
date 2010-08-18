@@ -3,10 +3,11 @@ Sinatrails is sinatra bootstrap project that suit to my needs to create web appl
 To use this project:
 1. git clone git://github.com/kuntoaji/sinatrails.git
 2. bundle install
-3. run rake db:migrate to create user. Note: Currently only support db:migrate task, so create your database first if you use mysql.
-4. run rake populate_dummy to create dummy users.
-5. run ./scripts/test to run test units.
-6. ./scripts/server -s thin to execute the thin server or ./scripts/console to the console.
+3. run rake db:create to create database
+4. run rake db:migrate to run migration
+5. run rake populate_dummy to create dummy users.
+6. run ./scripts/test to run all test units.
+7. ./scripts/server -s thin to execute the thin server or ./scripts/console to the console.
 
 License
 Sinatrails is released under MIT license.
