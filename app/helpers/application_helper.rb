@@ -17,20 +17,14 @@ class Application
       html = String.new
 
       if !resources.next_page.nil? and !resources.previous_page.nil?
-        html = "<p>"
-        html += "<a href='#{request.path_info}?page=#{resources.previous_page}'>Prev</a> "
+        html = "<a href='#{request.path_info}?page=#{resources.previous_page}'>&laquo; Prev</a> "
         html += "#{params[:page]} of #{resources.total_pages} "
-        html += "<a href='#{request.path_info}?page=#{resources.next_page}'>Next</a>"
-        html += "</p>"
+        html += "<a href='#{request.path_info}?page=#{resources.next_page}'>Next &raquo;</a>"
       elsif !resources.next_page.nil? and resources.previous_page.nil?
-        html = "<p>"
-        html += "<a href='#{request.path_info}?page=#{resources.next_page}'>Next</a>"
-        html += "</p>"
+        html = "<a href='#{request.path_info}?page=#{resources.next_page}'>Next &raquo;</a>"
       elsif resources.next_page.nil? and !resources.previous_page.nil?
-        html = "<p>"
-        html += "<a href='#{request.path_info}?page=#{resources.previous_page}'>Prev</a> "
+        html = "<a href='#{request.path_info}?page=#{resources.previous_page}'>&laquo; Prev</a> "
         html += "#{params[:page]} of #{resources.total_pages}"
-        html += "</p>"
       end
       return html
     end
