@@ -14,17 +14,23 @@ class Application
     end
 
     def paginate(resources)
-      html = String.new
+      current_page = params[:page].to_s
 
       if !resources.next_page.nil? and !resources.previous_page.nil?
-        html = "<a href='#{request.path_info}?page=#{resources.previous_page}'>&laquo; Prev</a> "
-        html += "#{params[:page]} of #{resources.total_pages} "
-        html += "<a href='#{request.path_info}?page=#{resources.next_page}'>Next &raquo;</a>"
+        html = "<a href='#{request.path}?#{request.query_string.tr('page=' + current_page, 'page=' + resources.previous_page.to_s)}'>&laquo; Prev</a> "
+        html += "<span>#{current_page}</span> of #{resources.total_pages}"
+        html += "<a href='#{request.path}?#{request.query_string.tr('page=' + current_page, 'page=' + resources.next_page.to_s)}'>Next &raquo;</a>"
       elsif !resources.next_page.nil? and resources.previous_page.nil?
-        html = "<a href='#{request.path_info}?page=#{resources.next_page}'>Next &raquo;</a>"
+        if request.query_string.empty?
+          html = "<a href='#{request.path}?page=#{resources.next_page}'>Next &raquo;</a>"
+        elsif !current_page.empty?
+          html = "<a href='#{request.path}?#{request.query_string.tr('page=' + current_page, 'page=' + resources.next_page.to_s)}'>Next &raquo;</a>"
+        else
+          html = "<a href='#{request.fullpath}&page=#{resources.next_page}'>Next &raquo;</a>"
+        end
       elsif resources.next_page.nil? and !resources.previous_page.nil?
-        html = "<a href='#{request.path_info}?page=#{resources.previous_page}'>&laquo; Prev</a> "
-        html += "#{params[:page]} of #{resources.total_pages}"
+        html = "<a href='#{request.path}?#{request.query_string.tr('page=' + current_page, 'page=' + resources.previous_page.to_s)}'>&laquo; Prev</a> "
+        html += "#{current_page} of #{resources.total_pages}"
       end
       return html
     end
