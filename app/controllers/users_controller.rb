@@ -19,7 +19,7 @@ class Application
     if @user.save
       redirect "/users"
     else
-      redirect "/"
+      haml :users_new
     end
   end
 
@@ -42,7 +42,7 @@ class Application
       if @user.update_attributes(params[:user])
         redirect "/users"
       else
-        redirect "/"
+        haml :users_edit
       end
     else
       haml :not_found

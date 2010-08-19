@@ -2,10 +2,23 @@ class User < ActiveRecord::Base
   extend WillPaginate::Finders::Base
 
   attr_accessor :password, :password_confirmation
-  validates :email, :name, :role, :presence => true
-  validates_uniqueness_of :email
-  validates_confirmation_of :password_confirmation, :if => :password_is_not_blank?
-  before_save :hash_password, :if => :password_is_not_blank?
+
+  validates :email, 
+    :presence => true,
+    :uniqueness => true,
+    :format => { :with => /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i, :message => "is not formatted properly"}
+
+  validates :password,
+    :length => {:minimum => 6},
+    :confirmation => true,
+    :unless => lambda{|u| u.password.blank?}
+
+  validates :password_confirmation, 
+    :presence => true,
+    :unless => lambda{|u| u.password.blank?}
+
+  validates :name, :role, :presence => true
+  before_save :hash_password, :unless => lambda{|u| u.password.blank?}
 
   def self.authenticate(email, password)
     if user = find_by_email(email)
@@ -17,16 +30,15 @@ class User < ActiveRecord::Base
     return nil
   end
 
-  def password_is_not_blank?
-    !self.password.blank?
-  end
-
   def admin?
     self.role == "admin"
   end
 
-  private
+  def member?
+    self.role == "member"
+  end
 
+  private
   def hash_password
     self.password_salt = ActiveSupport::SecureRandom.base64(8)
     self.encrypted_password = Digest::SHA2.hexdigest(self.password_salt + self.password)

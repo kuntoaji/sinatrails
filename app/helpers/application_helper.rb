@@ -4,6 +4,10 @@ class Application
       current_user.admin?
     end
 
+    def member?
+      current_user.member?
+    end
+
     # source: http://sinatra-book.gittr.com/#implemention_of_rails_style_partials
     def partial(page, format="haml", options={})
       if format == "haml"

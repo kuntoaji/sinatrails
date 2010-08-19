@@ -1,37 +1,50 @@
-#body
-  %header
+%form{:action => "/users#{'/' + @user.id.to_s if @user.id}", :method => "post"}
+  %fieldset
     %h2
-      Edit
-  .content
-    %form{:action => "/users#{'/' + @user.id.to_s if @user}", :method => "post", :class => "globalForm"}
-      .inputs
-        %ul
-          - if @user.id
-            %input{:type => "hidden", :name => "_method", :value => "put"}
-          %li
-            %label{:for => "user_email"}
-              Email
-            %input{:type => "email", :value => "#{@user.email}", :name => "user[email]"}
-          %li
-            %label{:for => "user_password"}
-              Password    
-            %input{:type => "password", :name => "user[password]"}
-          %li
-            %label{:for => "user_password_confirmation"}
-              Password Confirmation
-            %input{:type => "password", :name => "user[password_confirmation]"}
-          %li
-            %label{:for => "user_name"}
-              Name
-            %input{:type => "text", :value => "#{@user.name}", :name => "user[name]"}
-          %li
-            %label{:for => "user_role"}
-              Role
-            %select{:name => "user[role]"}
-              %option{:value => "admin", :selected => (true if @user.role == "admin")}
-                Admin
-              %option{:value => "client", :selected => (true if @user.role == "client")}
-                Client
-      .buttons
-        %button{:type => "submit"}
-          Save
+      Account details
+    - if @user.id
+      %input{:type => "hidden", :name => "_method", :value => "put"}
+    %ul
+      %li
+        %label{:for => "user_email"}
+          Email
+        %input{:type => "email", :value => "#{@user.email}", :name => "user[email]"}
+        - unless @user.errors[:email].blank?
+          %span
+            = @user.errors[:email].first.capitalize
+      %li
+        %label{:for => "user_password"}
+          Password    
+        %input{:type => "password", :name => "user[password]"}
+        - unless @user.errors[:password].blank?
+          %span
+            = @user.errors[:password].first.capitalize
+      %li
+        %label{:for => "user_password_confirmation"}
+          Password Confirmation
+        %input{:type => "password", :name => "user[password_confirmation]"}
+        - unless @user.errors[:password_confirmation].blank?
+          %span
+            = @user.errors[:password_confirmation].first.capitalize
+  %fieldset
+    %h2
+      Personal information
+    %ul
+      %li
+        %label{:for => "user_name"}
+          Name
+        %input{:type => "text", :value => "#{@user.name}", :name => "user[name]"}
+        - unless @user.errors[:name].blank?
+          %span
+            = @user.errors[:name].first.capitalize
+      %li
+        %label{:for => "user_role"}
+          Role
+        %select{:name => "user[role]"}
+          %option{:value => "admin", :selected => (true if @user.role == "admin")}
+            Admin
+          %option{:value => "member", :selected => (true if @user.role == "member")}
+            Member
+  .buttons
+    %button{:type => "submit"}
+      Save
