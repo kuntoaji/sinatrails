@@ -1,6 +1,4 @@
 #!/usr/bin/env ruby
 
-arguments = ARGV.join(" ")
-
-system("bundle exec rackup #{arguments}")
+system("bundle exec rackup #{$*}")
 
