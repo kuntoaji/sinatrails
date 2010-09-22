@@ -1,3 +1,5 @@
+require 'digest/sha2'
+
 class User < ActiveRecord::Base
   extend WillPaginate::Finders::Base
 
@@ -22,8 +24,8 @@ class User < ActiveRecord::Base
 
   def self.authenticate(email, password)
     if user = find_by_email(email)
-      if user.encrypted_password == Digest::SHA2.hexdigest(user.password_salt + password)
-	return user
+      if user.encrypted_password == Digest::SHA512.hexdigest(user.password_salt + password)
+	      return user
       end
     end
 
@@ -40,7 +42,7 @@ class User < ActiveRecord::Base
 
   private
   def hash_password
-    self.password_salt = ActiveSupport::SecureRandom.base64(8)
-    self.encrypted_password = Digest::SHA2.hexdigest(self.password_salt + self.password)
+    self.password_salt = ActiveSupport::SecureRandom.base64(12)
+    self.encrypted_password = Digest::SHA512.hexdigest(self.password_salt + self.password)
   end
 end
