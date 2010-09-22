@@ -1,5 +1,3 @@
-Bundler.require :default
-
 class Application < Sinatra::Base
 end
 

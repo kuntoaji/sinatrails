@@ -6,6 +6,7 @@ begin
   ENV['BUNDLE_GEMFILE'] = gemfile
   require 'bundler'
   Bundler.setup
+  Bundler.require :default
 
   class Sinatrails
     def self.root
