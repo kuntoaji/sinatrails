@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require 'bundler/setup'
-require File.join(File.expand_path('../../', __FILE__), 'dependencies.rb')
+require File.join(File.expand_path('../../config/', __FILE__), 'boot.rb')
 require File.join(File.expand_path('../../', __FILE__), 'application.rb')
 
 # NOTE: Taken from irb script

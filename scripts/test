@@ -1,24 +1,34 @@
 #!/usr/bin/env ruby
 
-ENV["RACK_ENV"] = "test"
+require 'optparse'
 
-require 'test/unit'
-require 'rubygems'
-require 'rack/test'
-require 'bundler/setup'
-require File.join(File.expand_path('../../', __FILE__), 'dependencies.rb')
-require File.join(File.expand_path('../../', __FILE__), 'application.rb')
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: ./scripts/test [options] [arguments]"
 
-DatabaseCleaner.strategy = :truncation
-
-require File.join(File.expand_path('../../', __FILE__), 'test', 'application_test.rb')
-
-if ARGV.empty?
-  Dir[File.join(File.expand_path('../../', __FILE__), 'test', '*.rb')].each do |file|
-    load file
+  opts.on("-u", "--unit [FILENAME]", "Run unit test") do |unit|
+    dir = File.expand_path("../../test/unit/", __FILE__)
+    unit = Dir[File.join(dir, '*.rb')].map{|file| File.basename(file)}.join(",").gsub("_test.rb", "") if unit.nil?
+    options[:unit] = unit
   end
-else
-  ARGV.each do |file|
-    load File.join(File.expand_path('../../', __FILE__), 'test', "#{file}_test.rb")
+
+  opts.on("-i", "--integration [FILENAME]", "Run integration test") do |integration|
+    dir = File.expand_path("../../test/integration/", __FILE__)
+    integration = Dir[File.join(dir, '*.rb')].map{|file| File.basename(file)}.join(",").gsub("_test.rb", "") if integration.nil?
+    options[:integration] = integration
+  end
+end.parse!
+
+options.each do |key, value|
+  puts "Run #{key} test: #{value}"
+  dir = File.expand_path("../../test/#{key}/", __FILE__)
+  if !value.nil?
+    value.split(",").each do |file|
+      load dir + "/#{file}_test.rb"
+    end
+  else
+    Dir[FIle.join(dir, '*.rb')].each do |file|
+      load file
+    end
   end
 end

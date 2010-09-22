@@ -1,7 +1,13 @@
-class SessionTest < ApplicationTest
+require File.join(File.expand_path('../../', __FILE__), 'test_helper.rb')
+
+class SessionTest < Test::Unit::TestCase
+  def setup
+    DatabaseCleaner.clean
+  end
+
   def create_user
     User.create!(:email => "dummy@railsmine.net", :password => "secret", :password_confirmation => "secret",
-      :name => "Ajijay", :role => "admin")
+      :name => "Myname", :role => "admin")
   end
 
   def create_session
@@ -13,7 +19,7 @@ class SessionTest < ApplicationTest
     create_user
     create_session
 
-    assert_equal "http://example.org/users", last_request.url
+    assert_equal "http://example.org/", last_request.url
     assert true, last_response.ok?
   end
 
