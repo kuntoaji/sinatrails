@@ -1,6 +1,4 @@
-require 'rubygems'
-require 'bundler/setup'
-require 'dependencies.rb'
+require 'config/boot.rb'
 require 'application.rb'
 
 #$LOGGER = ActiveSupport::BufferedLogger.new("log/#{ENV['RACK_ENV']}.log")
