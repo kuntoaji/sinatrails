@@ -1,5 +1,9 @@
 class Application
   get '/' do
-    haml :index
+    if current_user
+      haml :'home/index'
+    else
+      haml :'sessions/login'
+    end
   end
 end

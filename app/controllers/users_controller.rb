@@ -3,13 +3,13 @@ class Application
     authorize_admin
     @users = User.order("created_at desc").
       paginate :page => params[:page], :per_page => 10
-    haml :users
+    haml :'users/index'
   end
 
   get '/users/new' do
     authorize_admin
     @user = User.new
-    haml :users_new
+    haml :'users/new'
   end
 
   post '/users' do
@@ -19,7 +19,7 @@ class Application
     if @user.save
       redirect "/users"
     else
-      haml :users_new
+      haml :'users/new'
     end
   end
 
@@ -28,9 +28,9 @@ class Application
     @user = User.find_by_id params[:id]
 
     if @user
-      haml :users_edit
+      haml :'users/edit'
     else
-      haml :not_found
+      haml :'shared/not_found'
     end
   end
 
@@ -42,21 +42,21 @@ class Application
       if @user.update_attributes(params[:user])
         redirect "/users"
       else
-        haml :users_edit
+        haml :'users/edit'
       end
     else
-      haml :not_found
+      haml :'shared/not_found'
     end
   end
 
   get '/users/:id' do
-    authorize_admin
+    authorize_user
     @user = User.find_by_id params[:id]
 
     if @user
-      haml :users_show
+      haml :'users/show'
     else
-      haml :not_found
+      haml :'shared/not_found'
     end
   end
 
@@ -68,7 +68,7 @@ class Application
       @user.destroy
       redirect "/users"
     else
-      haml :not_found
+      haml :'shared/not_found'
     end
   end
 end
