@@ -1,19 +1,28 @@
 class Application
-  ActiveRecord::Base.configurations = YAML::load(File.open('config/database.yml'))
+  configure do
+    set :raise_errors, false 
+    enable :sessions
+    enable :logging
+
+    disable :run
+    enable :method_override
+    use Rack::Flash, :sweep => true
+
+    set :views, Sinatrails.views
+    set :root, Sinatrails.root
+
+    env = ENV['RACK_ENV'] || 'development'
+    Bundler.require env
+
+    ActiveRecord::Base.configurations = YAML::load(File.open('config/database.yml'))
+    ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[env])
+  end
 
   configure :production do
-    Bundler.require :production
     disable :reload
-    ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['production'])
   end
 
   configure :development do
-    Bundler.require :development
-    ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['development'])
-  end
-
-  configure :test do
-    Bundler.require :test
-    ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['test'])
+    enable :show_exceptions
   end
 end
