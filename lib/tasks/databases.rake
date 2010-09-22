@@ -1,26 +1,40 @@
+# Port of ActiveRecord rake tasks. Does not include db:copy_migrations and db:fixtures tasks
 namespace :db do
-  task :environment do
-    ENV["RACK_ENV"] ||= "development"
-  end
-
   # http://github.com/rails/rails/raw/master/activerecord/lib/active_record/railties/databases.rake 
-  task(:load => :environment)do
+  task(:load_config => :environment)do
     require 'sinatra'
     require 'active_record'
     require 'logger'
+    require File.join(File.expand_path('../../../', __FILE__), 'config', 'boot.rb')
     require File.join(File.expand_path('../../../', __FILE__), 'config', 'environment.rb')
+    #ActiveRecord::Migrator.migrations_path = 'db/migrate'
+  end
+
+  namespace :create do
+    # desc 'Create all the local databases defined in config/database.yml'
+    task :all => :load_config do
+      ActiveRecord::Base.configurations.each_value do |config|
+        # Skip entries that don't have a database key, such as the first entry here:
+        #
+        #  defaults: &defaults
+        #    adapter: mysql
+        #    username: root
+        #    password:
+        #    host: localhost
+        #
+        #  development:
+        #    database: blog_development
+        #    <<: *defaults
+        next unless config['database']
+        # Only connect to local databases
+        local_database?(config) { create_database(config) }
+      end
+    end
   end
 
   desc "Create the database from config/database.yml"
-  task(:create => :load) do
+  task(:create => :load_config) do
     create_database(ActiveRecord::Base.configurations[ENV["RACK_ENV"]])
-  end
-
-  desc "Migrate the database"
-  task(:migrate => :load) do
-    ActiveRecord::Base.logger = Logger.new(STDOUT)
-    ActiveRecord::Migration.verbose = true
-    ActiveRecord::Migrator.migrate("db/migrate")
   end
 
   def create_database(config)
@@ -87,4 +101,380 @@ namespace :db do
     end
   end
 
+  namespace :drop do
+    # desc 'Drops all the local databases defined in config/database.yml'
+    task :all => :load_config do
+      ActiveRecord::Base.configurations.each_value do |config|
+        # Skip entries that don't have a database key
+        next unless config['database']
+        begin
+          # Only connect to local databases
+          local_database?(config) { drop_database(config) }
+        rescue Exception => e
+          $stderr.puts "Couldn't drop #{config['database']} : #{e.inspect}"
+        end
+      end
+    end
+  end
+
+  desc 'Drops the database for the current RACK_ENV (use db:drop:all to drop all databases)'
+  task :drop => :load_config do
+    config = ActiveRecord::Base.configurations[ENV['RACK_ENV']]
+    begin
+      drop_database(config)
+    rescue Exception => e
+      $stderr.puts "Couldn't drop #{config['database']} : #{e.inspect}"
+    end
+  end
+
+  def local_database?(config, &block)
+    if %w( 127.0.0.1 localhost ).include?(config['host']) || config['host'].blank?
+      yield
+    else
+      $stderr.puts "This task only modifies local databases. #{config['database']} is on a remote host."
+    end
+  end
+
+  desc "Migrate the database (options: VERSION=x, VERBOSE=false)."
+  task :migrate => :load_config do
+    ActiveRecord::Base.logger = Logger.new(STDOUT)
+    ActiveRecord::Migration.verbose = ENV["VERBOSE"] ? ENV["VERBOSE"] == "true" : true
+    #ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_path, ENV["VERSION"] ? ENV["VERSION"].to_i : nil)
+    ActiveRecord::Migrator.migrate("#{Sinatrails.root}/db/migrate", ENV["VERSION"] ? ENV["VERSION"].to_i : nil)
+    Rake::Task["db:schema:dump"].invoke if ActiveRecord::Base.schema_format == :ruby
+  end
+
+  namespace :migrate do
+    # desc  'Rollbacks the database one migration and re migrate up (options: STEP=x, VERSION=x).'
+    task :redo => :load_config do
+      if ENV["VERSION"]
+        Rake::Task["db:migrate:down"].invoke
+        Rake::Task["db:migrate:up"].invoke
+      else
+        Rake::Task["db:rollback"].invoke
+        Rake::Task["db:migrate"].invoke
+      end
+    end
+
+    # desc 'Resets your database using your migrations for the current environment'
+    task :reset => ["db:drop", "db:create", "db:migrate"]
+
+    # desc 'Runs the "up" for a given migration VERSION.'
+    task :up => :load_config do
+      version = ENV["VERSION"] ? ENV["VERSION"].to_i : nil
+      raise "VERSION is required" unless version
+      #ActiveRecord::Migrator.run(:up, ActiveRecord::Migrator.migrations_path, version)
+      ActiveRecord::Migrator.run(:up, "#{Sinatrails.root}/db/migrate", version)
+      Rake::Task["db:schema:dump"].invoke if ActiveRecord::Base.schema_format == :ruby
+    end
+
+    # desc 'Runs the "down" for a given migration VERSION.'
+    task :down => :load_config do
+      version = ENV["VERSION"] ? ENV["VERSION"].to_i : nil
+      raise "VERSION is required" unless version
+      #ActiveRecord::Migrator.run(:down, ActiveRecord::Migrator.migrations_path, version)
+      ActiveRecord::Migrator.run(:down, "#{Sinatrails.root}/db/migrate", version)
+      Rake::Task["db:schema:dump"].invoke if ActiveRecord::Base.schema_format == :ruby
+    end
+
+    desc "Display status of migrations"
+    task :status => :load_config do
+      config = ActiveRecord::Base.configurations[ENV['RACK_ENV']]
+      ActiveRecord::Base.establish_connection(config)
+      unless ActiveRecord::Base.connection.table_exists?(ActiveRecord::Migrator.schema_migrations_table_name)
+        puts 'Schema migrations table does not exist yet.'
+        next  # means "return" for rake task
+      end
+      db_list = ActiveRecord::Base.connection.select_values("SELECT version FROM #{ActiveRecord::Migrator.schema_migrations_table_name}")
+      file_list = []
+      Dir.foreach(File.join(Sinatrails.root, 'db', 'migrate')) do |file|
+        # only files matching "20091231235959_some_name.rb" pattern
+        if match_data = /(\d{14})_(.+)\.rb/.match(file)
+          status = db_list.delete(match_data[1]) ? 'up' : 'down'
+          file_list << [status, match_data[1], match_data[2]]
+        end
+      end
+      # output
+      puts "\ndatabase: #{config['database']}\n\n"
+      puts "#{"Status".center(8)}  #{"Migration ID".ljust(14)}  Migration Name"
+      puts "-" * 50
+      file_list.each do |file|
+        puts "#{file[0].center(8)}  #{file[1].ljust(14)}  #{file[2].humanize}"
+      end
+      db_list.each do |version|
+        puts "#{'up'.center(8)}  #{version.ljust(14)}  *** NO FILE ***"
+      end
+      puts
+    end
+  end
+
+  desc 'Rolls the schema back to the previous version (specify steps w/ STEP=n).'
+  task :rollback => :load_config do
+    step = ENV['STEP'] ? ENV['STEP'].to_i : 1
+    #ActiveRecord::Migrator.rollback(ActiveRecord::Migrator.migrations_path, step)
+    ActiveRecord::Migrator.rollback("#{Sinatrails.root}/db/migrate", step)
+    Rake::Task["db:schema:dump"].invoke if ActiveRecord::Base.schema_format == :ruby
+  end
+
+  # desc 'Pushes the schema to the next version (specify steps w/ STEP=n).'
+  task :forward => :load_config do
+    step = ENV['STEP'] ? ENV['STEP'].to_i : 1
+    #ActiveRecord::Migrator.forward(ActiveRecord::Migrator.migrations_path, step)
+    ActiveRecord::Migrator.forward("#{Sinatrails.root}/db/migrate", step)
+    Rake::Task["db:schema:dump"].invoke if ActiveRecord::Base.schema_format == :ruby
+  end
+
+  # desc 'Drops and recreates the database from db/schema.rb for the current environment and loads the seeds.'
+  task :reset => [ 'db:drop', 'db:setup' ]
+
+  # desc "Retrieves the charset for the current environment's database"
+  task :charset => :load_config do
+    config = ActiveRecord::Base.configurations[ENV['RACK_ENV']]
+    case config['adapter']
+    when /mysql/
+      ActiveRecord::Base.establish_connection(config)
+      puts ActiveRecord::Base.connection.charset
+    when 'postgresql'
+      ActiveRecord::Base.establish_connection(config)
+      puts ActiveRecord::Base.connection.encoding
+    when 'sqlite3'
+      ActiveRecord::Base.establish_connection(config)
+      puts ActiveRecord::Base.connection.encoding
+    else
+      $stderr.puts 'sorry, your database adapter is not supported yet, feel free to submit a patch'
+    end
+  end
+
+  # desc "Retrieves the collation for the current environment's database"
+  task :collation => :load_config do
+    config = ActiveRecord::Base.configurations[ENV['RACK_ENV']]
+    case config['adapter']
+    when /mysql/
+      ActiveRecord::Base.establish_connection(config)
+      puts ActiveRecord::Base.connection.collation
+    else
+      $stderr.puts 'sorry, your database adapter is not supported yet, feel free to submit a patch'
+    end
+  end
+
+  desc "Retrieves the current schema version number"
+  task :version => :load_config do
+    puts "Current version: #{ActiveRecord::Migrator.current_version}"
+  end
+
+  # desc "Raises an error if there are pending migrations"
+  task :abort_if_pending_migrations => :environment do
+    if defined? ActiveRecord
+      #pending_migrations = ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations_path).pending_migrations
+      pending_migrations = ActiveRecord::Migrator.new(:up, "#{Sinatrails.root}/db/migrate").pending_migrations
+
+      if pending_migrations.any?
+        puts "You have #{pending_migrations.size} pending migrations:"
+        pending_migrations.each do |pending_migration|
+          puts '  %4d %s' % [pending_migration.version, pending_migration.name]
+        end
+        abort %{Run "rake db:migrate" to update your database then try again.}
+      end
+    end
+  end
+
+  desc 'Create the database, load the schema, and initialize with the seed data (use db:reset to also drop the db first)'
+  task :setup => [ 'db:create', 'db:schema:load', 'db:seed' ]
+
+  desc 'Load the seed data from db/seeds.rb'
+  task :seed => 'db:abort_if_pending_migrations' do
+    seed_file = File.join(Sinatrails.root, 'db', 'seeds.rb')
+    load(seed_file) if File.exist?(seed_file)
+  end
+
+  namespace :schema do
+    desc "Create a db/schema.rb file that can be portably used against any DB supported by AR"
+    task :dump => :load_config do
+      require 'active_record/schema_dumper'
+      File.open(ENV['SCHEMA'] || "#{Sinatrails.root}/db/schema.rb", "w") do |file|
+        ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
+      end
+      Rake::Task["db:schema:dump"].reenable
+    end
+
+    desc "Load a schema.rb file into the database"
+    task :load => :load_config do
+      file = ENV['SCHEMA'] || "#{Sinatrails.root}/db/schema.rb"
+      if File.exists?(file)
+        load(file)
+      else
+        abort %{#{file} doesn't exist yet. Run "rake db:migrate" to create it then try again.}
+      end
+    end
+  end
+
+  namespace :structure do
+    desc "Dump the database structure to an SQL file"
+    task :dump => :load_config do
+      abcs = ActiveRecord::Base.configurations
+      case abcs[ENV['RACK_ENV']]["adapter"]
+      when /mysql/, "oci", "oracle"
+        ActiveRecord::Base.establish_connection(abcs[ENV['RACK_ENV']])
+        File.open("#{Sinatrails.root}/db/#{ENV['RACK_ENV']}_structure.sql", "w+") { |f| f << ActiveRecord::Base.connection.structure_dump }
+      when "postgresql"
+        ENV['PGHOST']     = abcs[ENV['RACK_ENV']]["host"] if abcs[ENV['RACK_ENV']]["host"]
+        ENV['PGPORT']     = abcs[ENV['RACK_ENV']]["port"].to_s if abcs[ENV['RACK_ENV']]["port"]
+        ENV['PGPASSWORD'] = abcs[ENV['RACK_ENV']]["password"].to_s if abcs[ENV['RACK_ENV']]["password"]
+        search_path = abcs[ENV['RACK_ENV']]["schema_search_path"]
+        unless search_path.blank?
+          search_path = search_path.split(",").map{|search_path| "--schema=#{search_path.strip}" }.join(" ")
+        end
+        `pg_dump -i -U "#{abcs[ENV['RACK_ENV']]["username"]}" -s -x -O -f db/#{ENV['RACK_ENV']}_structure.sql #{search_path} #{abcs[ENV['RACK_ENV']]["database"]}`
+        raise "Error dumping database" if $?.exitstatus == 1
+      when "sqlite", "sqlite3"
+        dbfile = abcs[ENV['RACK_ENV']]["database"] || abcs[ENV['RACK_ENV']]["dbfile"]
+        `#{abcs[ENV['RACK_ENV']]["adapter"]} #{dbfile} .schema > db/#{ENV['RACK_ENV']}_structure.sql`
+      when "sqlserver"
+        `scptxfr /s #{abcs[ENV['RACK_ENV']]["host"]} /d #{abcs[ENV['RACK_ENV']]["database"]} /I /f db\\#{ENV['RACK_ENV']}_structure.sql /q /A /r`
+        `scptxfr /s #{abcs[ENV['RACK_ENV']]["host"]} /d #{abcs[ENV['RACK_ENV']]["database"]} /I /F db\ /q /A /r`
+      when "firebird"
+        set_firebird_env(abcs[ENV['RACK_ENV']])
+        db_string = firebird_db_string(abcs[ENV['RACK_ENV']])
+        sh "isql -a #{db_string} > #{Sinatrails.root}/db/#{ENV['RACK_ENV']}_structure.sql"
+      else
+        raise "Task not supported by '#{abcs["test"]["adapter"]}'"
+      end
+
+      if ActiveRecord::Base.connection.supports_migrations?
+        File.open("#{Sinatrails.root}/db/#{ENV['RACK_ENV']}_structure.sql", "a") { |f| f << ActiveRecord::Base.connection.dump_schema_information }
+      end
+    end
+  end
+
+  namespace :test do
+    # desc "Recreate the test database from the current schema.rb"
+    task :load => 'db:test:purge' do
+      ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['test'])
+      ActiveRecord::Schema.verbose = false
+      Rake::Task["db:schema:load"].invoke
+    end
+
+    # desc "Recreate the test database from the current environment's database schema"
+    task :clone => %w(db:schema:dump db:test:load)
+
+    # desc "Recreate the test databases from the development structure"
+    task :clone_structure => [ "db:structure:dump", "db:test:purge" ] do
+      abcs = ActiveRecord::Base.configurations
+      case abcs["test"]["adapter"]
+      when /mysql/
+        ActiveRecord::Base.establish_connection(:test)
+        ActiveRecord::Base.connection.execute('SET foreign_key_checks = 0')
+        IO.readlines("#{Sinatrails.root}/db/#{ENV['RACK_ENV']}_structure.sql").join.split("\n\n").each do |table|
+          ActiveRecord::Base.connection.execute(table)
+        end
+      when "postgresql"
+        ENV['PGHOST']     = abcs["test"]["host"] if abcs["test"]["host"]
+        ENV['PGPORT']     = abcs["test"]["port"].to_s if abcs["test"]["port"]
+        ENV['PGPASSWORD'] = abcs["test"]["password"].to_s if abcs["test"]["password"]
+        `psql -U "#{abcs["test"]["username"]}" -f #{Sinatrails.root}/db/#{ENV['RACK_ENV']}_structure.sql #{abcs["test"]["database"]}`
+      when "sqlite", "sqlite3"
+        dbfile = abcs["test"]["database"] || abcs["test"]["dbfile"]
+        `#{abcs["test"]["adapter"]} #{dbfile} < #{Sinatrails.root}/db/#{ENV['RACK_ENV']}_structure.sql`
+      when "sqlserver"
+        `osql -E -S #{abcs["test"]["host"]} -d #{abcs["test"]["database"]} -i db\\#{ENV['RACK_ENV']}_structure.sql`
+      when "oci", "oracle"
+        ActiveRecord::Base.establish_connection(:test)
+        IO.readlines("#{Sinatrails.root}/db/#{ENV['RACK_ENV']}_structure.sql").join.split(";\n\n").each do |ddl|
+          ActiveRecord::Base.connection.execute(ddl)
+        end
+      when "firebird"
+        set_firebird_env(abcs["test"])
+        db_string = firebird_db_string(abcs["test"])
+        sh "isql -i #{Sinatrails.root}/db/#{ENV['RACK_ENV']}_structure.sql #{db_string}"
+      else
+        raise "Task not supported by '#{abcs["test"]["adapter"]}'"
+      end
+    end
+
+    # desc "Empty the test database"
+    task :purge => :load_config do
+      abcs = ActiveRecord::Base.configurations
+      case abcs["test"]["adapter"]
+      when /mysql/
+        ActiveRecord::Base.establish_connection(:test)
+        ActiveRecord::Base.connection.recreate_database(abcs["test"]["database"], abcs["test"])
+      when "postgresql"
+        ActiveRecord::Base.clear_active_connections!
+        drop_database(abcs['test'])
+        create_database(abcs['test'])
+      when "sqlite","sqlite3"
+        dbfile = abcs["test"]["database"] || abcs["test"]["dbfile"]
+        File.delete(dbfile) if File.exist?(dbfile)
+      when "sqlserver"
+        dropfkscript = "#{abcs["test"]["host"]}.#{abcs["test"]["database"]}.DP1".gsub(/\\/,'-')
+        `osql -E -S #{abcs["test"]["host"]} -d #{abcs["test"]["database"]} -i db\\#{dropfkscript}`
+        `osql -E -S #{abcs["test"]["host"]} -d #{abcs["test"]["database"]} -i db\\#{ENV['RACK_ENV']}_structure.sql`
+      when "oci", "oracle"
+        ActiveRecord::Base.establish_connection(:test)
+        ActiveRecord::Base.connection.structure_drop.split(";\n\n").each do |ddl|
+          ActiveRecord::Base.connection.execute(ddl)
+        end
+      when "firebird"
+        ActiveRecord::Base.establish_connection(:test)
+        ActiveRecord::Base.connection.recreate_database!
+      else
+        raise "Task not supported by '#{abcs["test"]["adapter"]}'"
+      end
+    end
+
+    # desc 'Check for pending migrations and load the test schema'
+    task :prepare => 'db:abort_if_pending_migrations' do
+      if defined?(ActiveRecord) && !ActiveRecord::Base.configurations.blank?
+        Rake::Task[{ :sql  => "db:test:clone_structure", :ruby => "db:test:load" }[ActiveRecord::Base.schema_format]].invoke
+      end
+    end
+  end
+
+  namespace :sessions do
+    # desc "Creates a sessions migration for use with ActiveRecord::SessionStore"
+    task :create => :load_config do
+      raise "Task unavailable to this database (no migration support)" unless ActiveRecord::Base.connection.supports_migrations?
+      #require 'rails/generators'
+      #Rails::Generators.configure!
+      #require 'rails/generators/rails/session_migration/session_migration_generator'
+      #Rails::Generators::SessionMigrationGenerator.start [ ENV["MIGRATION"] || "add_sessions_table" ]
+    end
+
+    # desc "Clear the sessions table"
+    task :clear => :load_config do
+      ActiveRecord::Base.connection.execute "DELETE FROM #{session_table_name}"
+    end
+  end
+end
+
+task 'test:prepare' => 'db:test:prepare'
+
+def drop_database(config)
+  case config['adapter']
+  when /mysql/
+    ActiveRecord::Base.establish_connection(config)
+    ActiveRecord::Base.connection.drop_database config['database']
+  when /^sqlite/
+    require 'pathname'
+    path = Pathname.new(config['database'])
+    file = path.absolute? ? path.to_s : File.join(Rails.root, path)
+
+    FileUtils.rm(file)
+  when 'postgresql'
+    ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
+    ActiveRecord::Base.connection.drop_database config['database']
+  end
+end
+
+def session_table_name
+  ActiveRecord::SessionStore::Session.table_name
+end
+
+def set_firebird_env(config)
+  ENV["ISC_USER"]     = config["username"].to_s if config["username"]
+  ENV["ISC_PASSWORD"] = config["password"].to_s if config["password"]
+end
+
+def firebird_db_string(config)
+  FireRuby::Database.db_string_for(config.symbolize_keys)
 end
