@@ -29,6 +29,12 @@
                   %a{:href=>"/login"}
                     Login              
     #wrapper
+      - if flash.has? :error
+        #message.error
+          %p
+            %strong
+              Error:
+            = flash[:error]
       = yield
     %script{:src => "http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"}
     = js_link_tag :sinatrails
