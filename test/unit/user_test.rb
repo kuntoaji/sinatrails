@@ -1,34 +1,53 @@
 require File.join(File.expand_path('../../', __FILE__), 'test_helper.rb')
 
 class UserTest < Test::Unit::TestCase
-  def setup
-    DatabaseCleaner.clean
+  context "On create a user" do
+    setup do
+      DatabaseCleaner.clean
+      @user = User.new(Factory.attributes_for(:user))
+    end
+
+    should "return true" do
+      assert @user.save
+    end
   end
 
-  def test_create_users
-    user = Factory.create(:user)
-    assert_not_nil user
-    assert_equal user.name, "Myname"
-  end
+  context "A User instance" do
+    setup do
+      DatabaseCleaner.clean
+      Factory.create(:user)
+      @user = User.first
+    end
 
-  def test_update_users
-    Factory.create(:user)
+    should "not nil and return its name" do
+      assert_not_nil @user
+      assert_equal @user.name, "Myname"
+    end
 
-    user = User.find_by_name "Myname"
-    user.name = "Foo"
-    user.save!
+    should "successfully destroyed" do
+      assert_not_equal 0, User.count
+      @user.destroy
+      assert_equal 0, User.count
+    end
 
-    assert_equal user.name, "Foo"
-    user.name = "Myname"
-    user.save!
-    assert_equal user.name, "Myname"
-  end
+    context "on update" do
+      setup do
+        @user.name = "Foo"
+      end
 
-  def test_destroy_users
-    Factory.create(:user)
-    user = User.first
-    assert_not_equal 0, User.count
-    user.destroy
-    assert_equal 0, User.count
+      should "return true" do
+        assert @user.save
+      end
+
+      context "with new name" do
+        setup do
+          @user.save
+        end
+
+        should "return its new name" do
+          assert_equal "Foo", @user.name
+        end
+      end
+    end
   end
 end

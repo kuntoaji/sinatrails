@@ -15,6 +15,7 @@ group :test do
   gem 'factory_girl', '1.3.2'
   gem 'capybara', '0.3.9', :require => ['capybara', 'capybara/dsl']
   gem 'launchy'
+  gem 'shoulda', '2.11.3'
 end
 
 group :deployment do
