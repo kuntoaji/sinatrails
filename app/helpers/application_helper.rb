@@ -52,7 +52,7 @@ class Application
     end
 
     # source: http://sinatra-book.gittr.com/#implemention_of_rails_style_partials
-    # to passing local varible:
+    # to passing local variable:
     # partial :template, nil, :locals => {:myvar => your_var}
     def partial(page, format = :haml, options = {})
       if format == :erb
@@ -62,26 +62,53 @@ class Application
       end
     end
 
-    def paginate(resources)
-      current_page = params[:page].to_s
+    # inspired from http://pastie.org/1192729 by krishnaprasad
+    def to_params(params_hash)
+      new_params = ''
+      stack = []
 
-      if !resources.next_page.nil? and !resources.previous_page.nil?
-        html = "<a href='#{request.path}?#{request.query_string.tr('page=' + current_page, 'page=' + resources.previous_page.to_s)}'>&laquo; Prev</a> "
-        html += "<span>#{current_page}</span> of #{resources.total_pages}"
-        html += "<a href='#{request.path}?#{request.query_string.tr('page=' + current_page, 'page=' + resources.next_page.to_s)}'>Next &raquo;</a>"
-      elsif !resources.next_page.nil? and resources.previous_page.nil?
-        if request.query_string.empty?
-          html = "<a href='#{request.path}?page=#{resources.next_page}'>Next &raquo;</a>"
-        elsif !current_page.empty?
-          html = "<a href='#{request.path}?#{request.query_string.tr('page=' + current_page, 'page=' + resources.next_page.to_s)}'>Next &raquo;</a>"
-        else
-          html = "<a href='#{request.fullpath}&page=#{resources.next_page}'>Next &raquo;</a>"
+      params_hash.each do |k, v|
+        unless k == "page"
+          if v.is_a?(Hash)
+            stack << [k,v]
+          else
+            new_params << "#{k}=#{v}&"
+          end
         end
-      elsif resources.next_page.nil? and !resources.previous_page.nil?
-        html = "<a href='#{request.path}?#{request.query_string.tr('page=' + current_page, 'page=' + resources.previous_page.to_s)}'>&laquo; Prev</a> "
-        html += "#{current_page} of #{resources.total_pages}"
       end
-      return html
+
+      stack.each do |parent, hash|
+        hash.each do |k, v|
+          unless k == "page"
+            if v.is_a?(Hash)
+              stack << ["#{parent}[#{k}]", v]
+            else
+              new_params << "#{parent}[#{k}]=#{v}&"
+            end
+          end
+        end
+      end
+
+      new_params.chop! # trailing &
+      "&" + new_params unless new_params.empty?
+    end
+
+    # inspired from http://pastie.org/1192729 by krishnaprasad
+    def paginate(resources)
+      parameters = to_params(params.clone)
+      
+      if !resources.next_page.nil? and !resources.previous_page.nil?
+        html = %^<a href="#{request.path_info}?page=#{resources.previous_page}#{parameters}">&laquo; Prev</a> ^
+        html += "#{params[:page]} of #{resources.total_pages} "
+        html += %^<a href="#{request.path_info}?page=#{resources.next_page}#{parameters}">Next &raquo;</a>^
+      elsif !resources.next_page.nil? and resources.previous_page.nil?
+        html = %^<a href="#{request.path_info}?page=#{resources.next_page}#{parameters}">Next &raquo;</a>^
+      elsif resources.next_page.nil? and !resources.previous_page.nil?
+        html = %^<a href="#{request.path_info}?page=#{resources.previous_page}#{parameters}">&laquo; Prev</a> ^
+        html += "#{params[:page]} of #{resources.total_pages}"
+      end
+
+      html
     end
   end
 end
