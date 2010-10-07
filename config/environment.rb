@@ -23,6 +23,9 @@ class Application
   end
 
   configure :development do
+    require 'new_relic/rack_app'
+    use NewRelic::Rack::DeveloperMode
+
     enable :show_exceptions
   end
 end

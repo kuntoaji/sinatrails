@@ -7,6 +7,7 @@ gem 'will_paginate', :git => 'git://github.com/mislav/will_paginate.git',
   :tag => 'v3.0.pre2', 
   :require => 'will_paginate/finders/base'
 gem 'rack-flash'
+gem 'newrelic_rpm'
 
 gem 'thin', :group => :development
 
