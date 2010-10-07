@@ -16,6 +16,39 @@ class Application
 
     ActiveRecord::Base.configurations = YAML::load(File.open('config/database.yml'))
     ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[env])
+
+    # Sending via GMail
+    Mail.defaults do
+      delivery_method :smtp, { :address              => "smtp.gmail.com",
+                               :port                 => 587,
+                               :domain               => 'example.com',
+                               :user_name            => 'yourusername',
+                               :password             => 'yourpassword',
+                               :authentication       => 'plain',
+                               :enable_starttls_auto => true  }
+    end
+
+    # Delivering the email
+    # 
+    # Once you have the settings right, sending the email is done by:
+    # 
+    #   Mail.deliver do
+    #     to 'yourname@example.org'
+    #     from 'hisname@example.net'
+    #     subject 'testing email'
+    #     body 'testing email'
+    #   end
+    # 
+    # Or by calling deliver on a Mail message
+    # 
+    #   mail = Mail.new do
+    #     to 'yourname@example.org'
+    #     from 'hisname@example.net'
+    #     subject 'testing email'
+    #     body 'testing email'
+    #   end
+    # 
+    #   mail.deliver!
   end
 
   configure :production do
