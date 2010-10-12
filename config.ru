@@ -1,5 +1,5 @@
 require 'config/boot.rb'
-require 'application.rb'
+require 'config/application.rb'
 
 #$LOGGER = ActiveSupport::BufferedLogger.new("log/#{ENV['RACK_ENV']}.log")
 #$LOGGER.auto_flushing = 10

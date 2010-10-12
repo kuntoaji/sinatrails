@@ -1,4 +1,4 @@
-class Application
+class Application < Sinatra::Base
   configure do
     set :raise_errors, false 
     enable :sessions

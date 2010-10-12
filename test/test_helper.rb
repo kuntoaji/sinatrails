@@ -4,7 +4,7 @@ require 'test/unit'
 require 'rubygems'
 require 'rack/test'
 require File.join(File.expand_path('../../config/', __FILE__), 'boot.rb')
-require File.join(File.expand_path('../../', __FILE__), 'application.rb')
+require File.join(File.expand_path('../../config/', __FILE__), 'application.rb')
 require File.join(File.expand_path('../', __FILE__), 'factories.rb')
 
 DatabaseCleaner.strategy = :truncation
