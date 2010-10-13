@@ -6,8 +6,9 @@ class Application < Sinatra::Base
 
     disable :run
     enable :method_override
-    use Rack::Flash, :sweep => true
+    use QueryCaching
 
+    use Rack::Flash, :sweep => true
     set :views, Sinatrails.views
     set :root, Sinatrails.root
 
