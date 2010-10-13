@@ -1,3 +1,4 @@
+autoload :QueryCaching, File.join(Sinatrails.root, 'lib/sinatrails/query_caching.rb')
 require File.expand_path('../environment.rb', __FILE__)
 
 autoload :Digest, 'digest/sha2'
@@ -11,3 +12,4 @@ end
   Dir[File.join(dir, '*.rb')].each{|file| require file }
 end
 
+# require or autoload your class or library from here.
