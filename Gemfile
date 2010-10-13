@@ -9,6 +9,8 @@ gem 'will_paginate', :git => 'git://github.com/mislav/will_paginate.git',
 gem 'rack-flash'
 gem 'newrelic_rpm'
 gem 'mail'
+gem 'memcache-client'
+gem 'rack-cache', :require => 'rack/cache'
 
 gem 'thin', :group => :development
 

@@ -8,6 +8,13 @@ class Application < Sinatra::Base
     enable :method_override
     use QueryCaching
 
+    # download from http://memcached.org/, install,
+    # run this command for development & test environment:
+    # memcached -vv
+    use Rack::Cache,
+      :metastore   => 'memcached://localhost:11211/meta',
+      :entitystore => 'memcached://localhost:11211/body'
+
     use Rack::Flash, :sweep => true
     set :views, Sinatrails.views
     set :root, Sinatrails.root
