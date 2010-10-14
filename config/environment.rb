@@ -1,5 +1,11 @@
 class Application < Sinatra::Base
   configure do
+    env = ENV['RACK_ENV'] || 'development'
+    Bundler.require env
+
+    # require or autoload your custom class or library from here.
+    autoload :QueryCaching, File.join(Sinatrails.root, 'lib/sinatrails/query_caching.rb')
+    
     set :raise_errors, false 
     enable :sessions
     enable :logging
@@ -18,9 +24,6 @@ class Application < Sinatra::Base
     use Rack::Flash, :sweep => true
     set :views, Sinatrails.views
     set :root, Sinatrails.root
-
-    env = ENV['RACK_ENV'] || 'development'
-    Bundler.require env
 
     ActiveRecord::Base.configurations = YAML::load(File.open('config/database.yml'))
     ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[env])
