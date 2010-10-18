@@ -1,3 +1,4 @@
+Dir[File.join(Sinatrails.root, 'lib/sinatrails', '*.rb')].each{|file| require file }
 require File.expand_path('../environment.rb', __FILE__)
 
 autoload :Digest, 'digest/sha2'

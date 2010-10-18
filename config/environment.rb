@@ -3,23 +3,22 @@ class Application < Sinatra::Base
     env = ENV['RACK_ENV'] || 'development'
     Bundler.require env
 
-    # require or autoload your custom class or library from here.
-    autoload :QueryCaching, File.join(Sinatrails.root, 'lib/sinatrails/query_caching.rb')
-    
     set :raise_errors, false 
     enable :sessions
     enable :logging
-
     disable :run
     enable :method_override
     use QueryCaching
+    use Marking
 
     # download from http://memcached.org/, install,
     # run this command for development & test environment:
     # memcached -vv
-    use Rack::Cache,
-      :metastore   => 'memcached://localhost:11211/meta',
-      :entitystore => 'memcached://localhost:11211/body'
+    # uncomment below to use Rack::Cache with memcached
+    #
+    #use Rack::Cache,
+    #  :metastore   => 'memcached://localhost:11211/meta',
+    #  :entitystore => 'memcached://localhost:11211/body'
 
     use Rack::Flash, :sweep => true
     set :views, Sinatrails.views

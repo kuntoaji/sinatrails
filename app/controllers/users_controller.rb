@@ -1,9 +1,15 @@
 class Application
   get '/users' do
-    authorize_admin
-    @users = User.order("created_at desc").
-      paginate :page => params[:page], :per_page => 10
-    haml :'users/index'
+    # Marker logger example
+    Marker.mark "processing users" do
+      authorize_admin
+      @users = User.order("created_at desc").
+        paginate :page => params[:page], :per_page => 10
+    end
+
+    Marker.mark "rendering users/index" do
+      haml :'users/index'
+    end
   end
 
   get '/users/new' do
