@@ -7,9 +7,7 @@ class Application
         paginate :page => params[:page], :per_page => 10
     end
 
-    Marker.mark "rendering users/index" do
-      haml :'users/index'
-    end
+    haml :'users/index'
   end
 
   get '/users/new' do

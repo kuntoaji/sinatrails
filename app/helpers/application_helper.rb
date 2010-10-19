@@ -110,5 +110,17 @@ class Application
 
       html
     end
+
+    def haml(template, options = {}, locals = {})
+      Marker.mark("rendering haml #{template}") do
+        super(template, options, locals)
+      end
+    end
+
+    def erb(template, options = {}, locals = {})
+      Marker.mark("rendering erb #{template}") do
+        super(template, options, locals)
+      end
+    end
   end
 end
