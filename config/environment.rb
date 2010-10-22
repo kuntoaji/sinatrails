@@ -1,5 +1,6 @@
 class Application < Sinatra::Base
   configure do
+    Dir[File.join(Sinatrails.root, 'lib/sinatrails', '*.rb')].each{|file| require file }
     env = ENV['RACK_ENV'] || 'development'
     Bundler.require env
 
