@@ -122,5 +122,9 @@ class Application
         super(template, options, locals)
       end
     end
+
+    def md5_etag(value, kind=:strong)
+      etag(Digest::MD5.hexdigest(value.object_id.to_s), kind)
+    end
   end
 end
