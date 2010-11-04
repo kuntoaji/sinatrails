@@ -47,7 +47,9 @@ class Application < Sinatra::Base
   configure :development do
     require 'new_relic/rack_app'
     use NewRelic::Rack::DeveloperMode
+  end
 
+  configure :development, :test do
     enable :show_exceptions
   end
 end
