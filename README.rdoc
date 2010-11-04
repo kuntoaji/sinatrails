@@ -1,7 +1,10 @@
+= README
+
 Sinatrails is sinatra bootstrap project that suit to my needs to create web application with Rails-like directory structure, Active Record as ORM, and jQuery.
 Support all ActiveRecord rake tasks except db:copy_migrations and db:fixtures
 
-To use this project:
+== How to use
+
 1. git clone git://github.com/kuntoaji/sinatrails.git
 2. bundle install
 3. edit config/database.yml based on your database configuration
@@ -13,5 +16,11 @@ To use this project:
 9. run ./scripts/test -u -i to run all unit test and all integration test
 10. ./scripts/server -s thin to execute the thin server or ./scripts/console to the console.
 
-License
-Sinatrails is released under MIT license.
+== Author
+
+Author:: {Kunto Aji Kristianto}[http://www.railsmine.net/] <kunto.aji.kr@gmail.com>
+
+
+== License
+
+Copyright (c) 2010 Kunto Aji Kristianto, Sinatrails is released under the MIT license.
