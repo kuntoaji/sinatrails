@@ -3,9 +3,9 @@ ENV["RACK_ENV"] = "test"
 require 'test/unit'
 require 'rubygems'
 require 'rack/test'
-require File.join(File.expand_path('../../config/', __FILE__), 'boot.rb')
-require File.join(File.expand_path('../../config/', __FILE__), 'application.rb')
-require File.join(File.expand_path('../', __FILE__), 'factories.rb')
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/application.rb', __FILE__)
+require File.expand_path('../factories.rb', __FILE__)
 
 DatabaseCleaner.strategy = :truncation
 Capybara.app = Application

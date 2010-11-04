@@ -1,3 +1,4 @@
+Bundler.require :default
 require File.expand_path('../environment.rb', __FILE__)
 
 autoload :Digest, 'digest'

@@ -1,13 +1,17 @@
 # Port of ActiveRecord rake tasks. Does not include db:copy_migrations and db:fixtures tasks
 namespace :db do
   # http://github.com/rails/rails/raw/master/activerecord/lib/active_record/railties/databases.rake 
-  task(:load_config => :environment)do
+  task :load_config => :environment do
     require 'sinatra'
     require 'active_record'
     require 'logger'
-    require File.join(File.expand_path('../../../', __FILE__), 'config', 'boot.rb')
-    require File.join(File.expand_path('../../../', __FILE__), 'config', 'environment.rb')
+
+    ActiveRecord::Base.configurations = YAML::load(File.open(Sinatrails.root + '/config/database.yml'))
     #ActiveRecord::Migrator.migrations_path = 'db/migrate'
+  end
+
+  task :connect => :load_config do
+    ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[ENV['RACK_ENV']])
   end
 
   namespace :create do
@@ -136,7 +140,7 @@ namespace :db do
   end
 
   desc "Migrate the database (options: VERSION=x, VERBOSE=false)."
-  task :migrate => :load_config do
+  task :migrate => :connect do
     ActiveRecord::Base.logger = Logger.new(STDOUT)
     ActiveRecord::Migration.verbose = ENV["VERBOSE"] ? ENV["VERBOSE"] == "true" : true
     #ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_path, ENV["VERSION"] ? ENV["VERSION"].to_i : nil)
@@ -146,7 +150,7 @@ namespace :db do
 
   namespace :migrate do
     # desc  'Rollbacks the database one migration and re migrate up (options: STEP=x, VERSION=x).'
-    task :redo => :load_config do
+    task :redo => :connect do
       if ENV["VERSION"]
         Rake::Task["db:migrate:down"].invoke
         Rake::Task["db:migrate:up"].invoke
@@ -160,7 +164,7 @@ namespace :db do
     task :reset => ["db:drop", "db:create", "db:migrate"]
 
     # desc 'Runs the "up" for a given migration VERSION.'
-    task :up => :load_config do
+    task :up => :connect do
       version = ENV["VERSION"] ? ENV["VERSION"].to_i : nil
       raise "VERSION is required" unless version
       #ActiveRecord::Migrator.run(:up, ActiveRecord::Migrator.migrations_path, version)
@@ -169,7 +173,7 @@ namespace :db do
     end
 
     # desc 'Runs the "down" for a given migration VERSION.'
-    task :down => :load_config do
+    task :down => :connect do
       version = ENV["VERSION"] ? ENV["VERSION"].to_i : nil
       raise "VERSION is required" unless version
       #ActiveRecord::Migrator.run(:down, ActiveRecord::Migrator.migrations_path, version)
@@ -209,7 +213,7 @@ namespace :db do
   end
 
   desc 'Rolls the schema back to the previous version (specify steps w/ STEP=n).'
-  task :rollback => :load_config do
+  task :rollback => :connect do
     step = ENV['STEP'] ? ENV['STEP'].to_i : 1
     #ActiveRecord::Migrator.rollback(ActiveRecord::Migrator.migrations_path, step)
     ActiveRecord::Migrator.rollback("#{Sinatrails.root}/db/migrate", step)
@@ -217,7 +221,7 @@ namespace :db do
   end
 
   # desc 'Pushes the schema to the next version (specify steps w/ STEP=n).'
-  task :forward => :load_config do
+  task :forward => :connect do
     step = ENV['STEP'] ? ENV['STEP'].to_i : 1
     #ActiveRecord::Migrator.forward(ActiveRecord::Migrator.migrations_path, step)
     ActiveRecord::Migrator.forward("#{Sinatrails.root}/db/migrate", step)
@@ -258,12 +262,13 @@ namespace :db do
   end
 
   desc "Retrieves the current schema version number"
-  task :version => :load_config do
+  task :version => :connect do
     puts "Current version: #{ActiveRecord::Migrator.current_version}"
   end
 
   # desc "Raises an error if there are pending migrations"
-  task :abort_if_pending_migrations => :environment do
+  #task :abort_if_pending_migrations => :environment do
+  task :abort_if_pending_migrations => :connect do
     if defined? ActiveRecord
       #pending_migrations = ActiveRecord::Migrator.new(:up, ActiveRecord::Migrator.migrations_path).pending_migrations
       pending_migrations = ActiveRecord::Migrator.new(:up, "#{Sinatrails.root}/db/migrate").pending_migrations
@@ -289,7 +294,7 @@ namespace :db do
 
   namespace :schema do
     desc "Create a db/schema.rb file that can be portably used against any DB supported by AR"
-    task :dump => :load_config do
+    task :dump => :connect do
       require 'active_record/schema_dumper'
       File.open(ENV['SCHEMA'] || "#{Sinatrails.root}/db/schema.rb", "w") do |file|
         ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
@@ -298,7 +303,7 @@ namespace :db do
     end
 
     desc "Load a schema.rb file into the database"
-    task :load => :load_config do
+    task :load => :connect do
       file = ENV['SCHEMA'] || "#{Sinatrails.root}/db/schema.rb"
       if File.exists?(file)
         load(file)
@@ -432,7 +437,7 @@ namespace :db do
 
   namespace :sessions do
     # desc "Creates a sessions migration for use with ActiveRecord::SessionStore"
-    task :create => :load_config do
+    task :create => :connect do
       raise "Task unavailable to this database (no migration support)" unless ActiveRecord::Base.connection.supports_migrations?
       #require 'rails/generators'
       #Rails::Generators.configure!
@@ -441,7 +446,7 @@ namespace :db do
     end
 
     # desc "Clear the sessions table"
-    task :clear => :load_config do
+    task :clear => :connect do
       ActiveRecord::Base.connection.execute "DELETE FROM #{session_table_name}"
     end
   end

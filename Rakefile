@@ -1,8 +1,4 @@
-#require 'rake'
-#require 'rake/testtask'
-#require 'rake/rdoctask'
-require 'rubygems'
-require 'bundler/setup'
+require File.expand_path('../config/boot.rb', __FILE__)
 
 begin
   require 'vlad'

@@ -1,5 +1,5 @@
 desc "Populate dummy data"
-task(:populate_dummy => 'db:load_config') do
+task(:populate_dummy => 'db:connect') do
   require 'will_paginate/finders/base'
   require File.join(File.expand_path('../../../', __FILE__), 'app', 'models', 'user.rb')
   15.times do |i|

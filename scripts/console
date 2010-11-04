@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require File.join(File.expand_path('../../config/', __FILE__), 'boot.rb')
-require File.join(File.expand_path('../../config/', __FILE__), 'application.rb')
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/application.rb', __FILE__)
 
 require "irb"
 require "irb/completion"
