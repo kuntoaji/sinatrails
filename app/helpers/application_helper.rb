@@ -99,13 +99,13 @@ class Application
       
       if !resources.next_page.nil? and !resources.previous_page.nil?
         html = %^<a href="#{request.path_info}?page=#{resources.previous_page}#{parameters}">&laquo; Prev</a> ^
-        html += "#{params[:page]} of #{resources.total_pages} "
-        html += %^<a href="#{request.path_info}?page=#{resources.next_page}#{parameters}">Next &raquo;</a>^
+        html << "#{params[:page]} of #{resources.total_pages} "
+        html << %^<a href="#{request.path_info}?page=#{resources.next_page}#{parameters}">Next &raquo;</a>^
       elsif !resources.next_page.nil? and resources.previous_page.nil?
         html = %^<a href="#{request.path_info}?page=#{resources.next_page}#{parameters}">Next &raquo;</a>^
       elsif resources.next_page.nil? and !resources.previous_page.nil?
         html = %^<a href="#{request.path_info}?page=#{resources.previous_page}#{parameters}">&laquo; Prev</a> ^
-        html += "#{params[:page]} of #{resources.total_pages}"
+        html << "#{params[:page]} of #{resources.total_pages}"
       end
 
       html
