@@ -28,6 +28,11 @@ class Application < Sinatra::Base
     ActiveRecord::Base.configurations = YAML::load(File.open('config/database.yml'))
     ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[env])
 
+    # Use utf-8
+    ActiveRecord::Base.connection.execute "SET collation_database = 'utf8_general_ci' "
+    ActiveRecord::Base.connection.execute "SET collation_connection = 'utf8_general_ci' "
+    ActiveRecord::Base.connection.execute "SET collation_server = 'utf8_general_ci' "
+
     # Sending via GMail
     Mail.defaults do
       delivery_method :smtp, { :address              => "smtp.gmail.com",
