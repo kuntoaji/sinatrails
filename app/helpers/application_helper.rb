@@ -110,16 +110,12 @@ class Application
       html
     end
 
-    def haml(template, options = {}, locals = {})
-      Marker.mark("rendering haml #{template}") do
-        super(template, options, locals)
-      end
+    def haml(template, options = {:layout => :"layouts/application"}, locals = {})
+      super(template, options, locals)
     end
 
-    def erb(template, options = {}, locals = {})
-      Marker.mark("rendering erb #{template}") do
-        super(template, options, locals)
-      end
+    def erb(template, options = {:layout => :"layouts/application"}, locals = {})
+      super(template, options, locals)
     end
 
     def md5_etag(value, kind=:strong)
