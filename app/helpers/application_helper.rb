@@ -1,8 +1,7 @@
 class Application
   helpers do
     def current_user
-      user = User.find_by_id session["user"]
-      return user
+      @current_user ||= User.find_by_id session["user"]
     end
 
     def authorize_user
