@@ -1,18 +1,22 @@
 source :rubygems
-gem 'sinatra', '1.0.0', :require => 'sinatra/base'
-gem 'activerecord', '3.0.0', :require => 'active_record'
-gem 'haml', '3.0.18'
-gem 'mysql'
-gem 'will_paginate', :git => 'git://github.com/mislav/will_paginate.git', 
-  :tag => 'v3.0.pre2', 
-  :require => 'will_paginate/finders/base'
+gem 'sinatra', '1.1.0', :require => 'sinatra/base'
+gem 'activerecord', '3.0.3', :require => 'active_record'
+gem 'haml'
+gem 'mysql2'
+gem 'will_paginate', '~> 3.0.beta', :require => 'will_paginate/finders/base'
 gem 'rack-flash'
 gem 'newrelic_rpm'
 gem 'mail'
-gem 'memcache-client'
-gem 'rack-cache', :require => 'rack/cache'
 
-gem 'thin', :group => :development
+#group :cache do
+  #gem 'sinatra-cache', :require => 'sinatra/cache'
+  #gem 'memcache-client'
+  #gem 'rack-cache', :require => 'rack/cache'
+#end
+
+group :development do
+  gem 'thin'
+end
 
 group :test do
   gem 'database_cleaner', '0.5.2'
