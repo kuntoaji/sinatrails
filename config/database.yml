@@ -1,5 +1,5 @@
 development:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   reconnect: false
   database: sinatrails_development
@@ -14,7 +14,7 @@ development:
   #socket: /var/run/mysqld/mysqld.sock
 
 test:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   reconnect: false
   database: sinatrails_test
@@ -28,7 +28,7 @@ test:
   #socket: /var/run/mysqld/mysqld.sock
 
 production:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
   reconnect: false
   database: sinatrails_production

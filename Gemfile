@@ -19,7 +19,7 @@ group :development do
 end
 
 group :test do
-  gem 'database_cleaner', '0.5.2'
+  gem 'database_cleaner', '0.6.0'
   gem 'factory_girl', '1.3.2'
   gem 'capybara', '0.3.9', :require => ['capybara', 'capybara/dsl']
   gem 'launchy'
